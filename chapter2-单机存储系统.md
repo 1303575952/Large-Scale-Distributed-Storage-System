@@ -114,3 +114,20 @@ LevelDB后台线程会将不可变MemTable的数据排序后转储到磁盘，�
 LevelDB写入操作很简单，但读取操作比较复杂，需要在内存以及各级文件中按照从新到老依次查找，代价很高。为了加快速度，LevelDB内部会执行Compaction操作来对已有的记录进行压缩整理，从而删除一些不再有效的记录，减少数据规模和文件数量。
 
 LevelDB的两种Compaction操作：minor compaction和major compaction。
+
+## 2.3 数据模型
+
+*存储系统的数据模型主要包括三类：文件、关系、键值模型。此外还包括关系弱化的表格模型等等。*
+
+### 2.3.1 文件模型
+
+文件系统以目录树的形式组织文件。POSIX（Portable Operating System Interface）是应用程序访问文件系统的API标准，定义了文件系统存储接口及操作集。POSIX主要接口：
+
+* open/close 打开/关闭一个文件，获取文件描述符；
+* read/write 读取一个文件或者往文件中写入数据；
+* opendir/closedir 打开或关闭一个目录
+* readdir 遍历目录。
+
+POSIX不仅定义了文件操作接口，而且还定义了读写操作语义。例如考虑原子性，读操作能够读到之前所有写操作的结果。POSIX适合单机文件系统，出于性能考虑，分布式文件系统一般不会完全遵守这个标准。NFS（Network File System）允许客户端缓存文件数据，多个客户端并发修改同一个文件可能出现不一致的情况。例，NFS客户端A和B同时修改NFS服务器某个文件，A和B都在本地缓存了文件副本，A先提交B后提交，即使A和B修改的是文件的不同位置，也会出现B覆盖A的情况。
+
+对象模型和文件模型比较类似，用于存储图片、视频、文档等二进制数据块，典型的系统包括Amazon Simple Storage，Taobao File System。这些系统弱化了目录树的概念，Amazon Simple Storage只支持一级目录，不支持子目录，Taobao File System甚至不支持目录结构。与文件模型不同的是，对象模型要求对象一次性写入到数据库，只能删除整个对象，不能修改其中某个部分。
