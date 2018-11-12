@@ -113,4 +113,4 @@ LevelDB后台线程会将不可变MemTable的数据排序后转储到磁盘，�
 
 LevelDB写入操作很简单，但读取操作比较复杂，需要在内存以及各级文件中按照从新到老依次查找，代价很高。为了加快速度，LevelDB内部会执行Compaction操作来对已有的记录进行压缩整理，从而删除一些不再有效的记录，减少数据规模和文件数量。
 
-LevelDB的两种Compaction操作：
+LevelDB的两种Compaction操作：minor compaction和major compaction。
