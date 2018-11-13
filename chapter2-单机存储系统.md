@@ -160,3 +160,55 @@ NoSQL系统带来了很多新的理念，比如良好的可扩展性，弱化数
 
 * **缺少统一标准** 关系数据库有SQL这样的标准，并拥有完整的生态链。然而NoSQL系统使用方法各不相同，切换成本高，很难通用。
 * **使用及运维复杂** NoSQL的选型及使用方式往往需要理解系统的实现。
+
+## 2.4 事务与并发控制
+
+### 2.4.1 事务
+
+事务具有ACID属性。
+
+出于性能考虑，许多数据库允许使用者选择牺牲隔离属性来换取并发度，从而获得性能的提升。
+
+四种隔离级别：
+
+* Read Uncommitted(RU)
+* Read Committed(RC)
+* Repeatable Read(RR)
+* Serializable(S)
+
+隔离级别的降低可能导致读到脏数据或者事务执行异常，例如：
+
+* Lost Update(LU)
+* Dirty Reads(DR)
+* Non-Repeatable Reads(NRR)
+* Second Lost Updates(SLU)
+* Phantom Reads(PR)
+
+|LU|DR|NRR|SLU|PR
+:-:|:-:|:-:|:-:|:-:
+RU|N|Y|Y|Y|Y
+RC|N|N|Y|Y|Y
+RR|N|N|N|N|Y
+S|N|N|N|N|N
+
+### 2.4.2 并发控制
+
+1. 数据库锁
+
+事务可以分为：读事务、写事务、读写混合事务。相应地，锁也分为两种类型：读锁、写锁。其中，写事务阻塞读事务。
+
+2. 写时复制
+
+写时复制（Copy-On_Write，COW）读操作不加锁，极大地提高了读取性能。
+
+写时复制B+树执行写操作的步骤如下：
+
+* 拷贝
+* 修改
+* 提交
+
+如果读操作发生在提交前，那么，将读取老节点的数据，否则读取新节点。
+
+3. 多版本并发控制
+
+MVCC，即Multi-Version Concurrency Control，也能够实现读事务不加锁。MVCC对每行数据维护多个版本，无论事务的执行时间有多长，MVCC总能提供与事务开始时刻相一致的数据。
