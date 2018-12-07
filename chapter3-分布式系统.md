@@ -294,3 +294,13 @@ Paxos协议用于解决多个节点之间的一致性问题。多个节点之间
 * 确认（acknowledge）:如果超过一半的acceptor接受，意味着提议值已经生效，proposer发送acknowledge消息通知所有的acceptor提议生效。
 
 当出现网络或其他异常时，系统中可能存在多个proposer，，他们各自发起不同的提议。这里的提议可以是一个修改操作，也可以是提议自己成为一个主节点。如果proposer第一次发起的accept请求没有被acceptor中多数派批准（例如与其他proposer的提议冲突），那么，需要完整地执行一轮Paxos协议。过程如下：
+
+* 准备（prepare）：Proposer首先选择一个提议序列号n给其他的acceptor节点发送prepare消息。Acceptor接收到prepare消息后，如果提议的序号大于他已回复的所有prepare消息，则acceptor将自己上次接受的提议回复给proposer，并承诺不再小于n的提议。
+* 批准（accept）：Proposer收到了acceptor中的多数对prepare的回复后，就进入批准阶段。如果在之前的prepare阶段acceptor回复了上次接收的提议，那么，proposer选择其中序号最大的提议值发送给acceptor批准；否则，proposer生成一个新的提议值发给acceptor批准。Acceptor在不违背他之前在prepare阶段的承诺的前提下，收受这个请求。
+* 确认（acknowledge）:如果超过一半的acceptor接受，提议值生效。Proposer发送acknowledge消息通知所有的acceptor提议生效。
+
+Paxos协议需要考虑两个问题：正确性，即只有一个提议值会生效；可终止性，即最后总会有一个提议值生效。Paxos协议中要求每个生效的提议被acceptor中的多数派接收，并且每个acceptor不会接受两个不同的提议，因此可以保证正确性。Paxos协议并不能够严格保证可终止性。但是，从Paxos协议的执行过程可以看出，只要超过一个acceptor接受了提议，proposer很快就会发现，并重新提议其中序号最大的提议值。因此，随着协议不断运行，它会往“某个提议值被多数派接受并生效”这一最终目标靠拢。
+
+**参见：http://www.cnblogs.com/zhang-qc/p/8688258.html**
+
+**没看懂**
