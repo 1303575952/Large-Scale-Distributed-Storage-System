@@ -23,3 +23,9 @@ GFS文件被划分为固定大小的数据块（chunk），由主服务器在创
 需要注意的是，GFS中的客户端不缓存文件数据，只缓存主控服务器中获取的元数据，这是GFS的应用特点决定的。GFS最主要的应用有两个：MapReduce和Bigtable。对于MapReduce，GFS客户端使用方式为顺序读写，没有缓存文件数据的必要；而Bigtable作为分布式表格系统，内部实现了一套缓存机制。另外，如何维护客户端缓存与实际数据之间的一致性是一个极其复杂的问题。
 
 ![GFS整体架构](chapter4-pic/图4.1.1-GFS整体架构.png)
+
+### 4.1.2 关键问题
+
+1. 租约机制
+
+GFS数据追加以记录为单位每个记录的大小为几十KB到几MB不等，如果每次记录追加都需要请求Master，那么Master显然会成为系统的性能瓶颈，因此，GFS系统中通过租约（lease）机制将chunk写操作授权给ChunkServer。拥有租约授权的Chunkserve称为ChunkServer，其他副本所在的ChunkServer称为备ChunkServer。
